@@ -1,16 +1,25 @@
 import json
 from typing import List, Dict, Any
-from etl import ETL, Extract, Transfer, Load, EndpointETL, WatchETL, FetchETL
+from etl import ETL, Extract, Transform, Load
 
 
 def create_etl(etl_data: Dict[str, Any]) -> ETL:
-    etl_type = etl_data['type']
 
     # Create extract instances
+    extract_classes = {
+        'MongoDB': Extract,
+        'PostgresSQL': Extract,
+        'MySQL': Extract,
+        'Elasticsearch': Extract,
+        'ApacheKafka': Extract
+    }
+
     extracts = []
     for extract_data in etl_data.get('extracts', []):
-        extracts.append(Extract(
+        extract_class = extract_classes.get(extract_data['source'], Extract)
+        extracts.append(extract_class(
             type=extract_data['type'],
+            source=extract_data['source'],
             host=extract_data['host'],
             port=extract_data['port'],
             username=extract_data['username'],
@@ -19,15 +28,24 @@ def create_etl(etl_data: Dict[str, Any]) -> ETL:
         ))
 
     # Create transfer instances
-    transfers = []
-    for transfer_data in etl_data.get('transfers', etl_data.get('Transfers', [])):
-        transfers.append(Transfer(operation=transfer_data))
+    transforms = []
+    for transfer_data in etl_data.get('transforms', etl_data.get('transforms', [])):
+        transforms.append(Transform(operation=transfer_data))
 
     # Create load instances
+    load_classes = {
+        'MongoDB': Load,
+        'PostgresSQL': Load,
+        'MySQL': Load,
+        'Elasticsearch': Load,
+        'ApacheKafka': Load
+    }
+
     loads = []
     for load_data in etl_data.get('loads', []):
-        loads.append(Load(
-            type=load_data['type'],
+        load_class = load_classes.get(load_data['target'], Load)
+        loads.append(load_class(
+            target=load_data['target'],
             host=load_data['host'],
             port=load_data['port'],
             username=load_data['username'],
@@ -38,18 +56,10 @@ def create_etl(etl_data: Dict[str, Any]) -> ETL:
             topic=load_data.get('topic')
         ))
 
-    # Map ETL types to classes
-    etl_classes = {
-        'Watch': WatchETL,
-        'Fetch': FetchETL,
-        'Endpoint': EndpointETL
-    }
-
     # Create ETL instance
-    etl_class = etl_classes.get(etl_type, ETL)
-    return etl_class(
+    return ETL(
         extracts=extracts,
-        transfers=transfers,
+        transforms=transforms,
         loads=loads
     )
 

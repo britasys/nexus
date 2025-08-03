@@ -1,64 +1,78 @@
-from dataclasses import dataclass
 from typing import List, Dict, Any
 
 
-@dataclass
 class Extract:
-    type: str
-    host: str
-    port: str
-    username: str
-    password: str
-    token: str
+    def __init__(self,
+                 type: str,
+                 source: str,
+                 host: str,
+                 port: str,
+                 username: str,
+                 password: str,
+                 token: str):
+        self.type = type
+        self.source = source
+        self.host = host
+        self.port = port
+        self.username = username
+        self.password = password
+        self.token = token
+
+    def extract(self):
+        pass
 
 
-@dataclass
-class Transfer:
-    operation: Dict[str, Any]
+class Transform:
+    def __init__(self, operation: Dict[str, Any]):
+        self.operation = operation
+
+    def transform(self, data):
+        pass
 
 
-@dataclass
 class Load:
-    type: str
-    host: str
-    port: str
-    username: str
-    password: str
-    token: str
-    bucket: str = None
-    endpoint: str = None
-    topic: str = None
+    def __init__(self,
+                 target: str,
+                 host: str,
+                 port: str,
+                 username: str,
+                 password: str,
+                 token: str,
+                 bucket: str = None,
+                 endpoint: str = None,
+                 topic: str = None):
+        self.target = target
+        self.host = host
+        self.port = port
+        self.username = username
+        self.password = password
+        self.token = token
+        self.bucket = bucket
+        self.endpoint = endpoint
+        self.topic = topic
+
+    def load(self, data):
+        pass
 
 
 class ETL:
     def __init__(self,
                  extracts: List[Extract],
-                 transfers: List[Transfer],
+                 transforms: List[Transform],
                  loads: List[Load]):
         self.extracts = extracts
-        self.transfers = transfers
+        self.transforms = transforms
         self.loads = loads
 
-    def _run_extracts(self):
+    def _run_extracts(self, handle_data: callable):
         pass
 
     def run(self):
-        self._run_extracts()
-        # TODO: Register for ZMQ
-        # TODO: Run transfers to the data that extracted
-        # TODO: Run loads to store the ouput data
+        def handle_data(data):
+            transformed_data = None
+            for transform in self.transforms:
+                transformed_data = {**transform.transform(data)}
+            for load in self.loads:
+                load.load(transformed_data)
 
-
-class WatchETL(ETL):
-    def _run_extracts(self):
-        pass
-
-
-class FetchETL(ETL):
-    def _run_extracts(self):
-        pass
-
-
-class EndpointETL(ETL):
-    def _run_extracts(self):
-        pass
+        self._run_extracts(handle_data)

@@ -9,7 +9,7 @@ if __name__ == "__main__":
     # Print the resulting ETL instances for verification
     for etl in etls_array:
         print("Extracts:", [vars(extract) for extract in etl.extracts])
-        print("Transfers:", [vars(transfer) for transfer in etl.transfers])
+        print("Transforms:", [vars(transfer) for transfer in etl.transforms])
         print("Loads:", [vars(load) for load in etl.loads])
         etl.run()
         print("--------------------------------------------------------")

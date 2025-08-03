@@ -1,10 +1,10 @@
 {
   "ETLs": [
     {
-      "type": "Watch",
       "extracts": [
         {
-          "type": "MongoDB",
+          "type": "Watch",
+          "source": "MongoDB",
           "host": "localhost",
           "port": "5050",
           "username": "test_username",
@@ -12,7 +12,17 @@
           "token": "test_token"
         },
         {
-          "type": "ElasticSearch",
+          "type": "Watch",
+          "source": "ElasticSearch",
+          "host": "localhost",
+          "port": "5050",
+          "username": "test_username",
+          "password": "test_password",
+          "token": "test_token"
+        },
+        {
+          "type": "Fetch",
+          "source": "PostgreSQL",
           "host": "localhost",
           "port": "5050",
           "username": "test_username",
@@ -20,7 +30,8 @@
           "token": "test_token"
         }
       ],
-      "Transfers": [
+      "transforms": [
+        { "join": [] },
         { "select": ["name", "phone_number"] },
         { "remove": ["address", "zip_code"] },
         {
@@ -32,7 +43,7 @@
       ],
       "loads": [
         {
-          "type": "Kafka",
+          "target": "Kafka",
           "host": "localhost",
           "port": "5050",
           "username": "test_username",
@@ -40,7 +51,7 @@
           "token": "test_token"
         },
         {
-          "type": "MySQL",
+          "target": "MySQL",
           "host": "localhost",
           "port": "5050",
           "username": "test_username",
@@ -48,7 +59,7 @@
           "token": "test_token"
         },
         {
-          "type": "PostgreSQL",
+          "target": "PostgreSQL",
           "host": "localhost",
           "port": "5050",
           "username": "test_username",
@@ -56,37 +67,6 @@
           "token": "test_token"
         }
       ]
-    },
-    {
-      "type": "Fetch",
-      "extracts": [],
-      "transfers": [
-        { "join": [] },
-        { "select": ["name", "phone_number"] },
-        { "remove": ["address", "zip_code"] },
-        {
-          "change": [
-            { "from": "name", "to": "full_name" },
-            { "from": "address", "to": "addr" }
-          ]
-        }
-      ],
-      "loads": []
-    },
-    {
-      "type": "Endpoint",
-      "extracts": [],
-      "transfers": [
-        { "select": ["name", "phone_number"] },
-        { "remove": ["address", "zip_code"] },
-        {
-          "change": [
-            { "from": "name", "to": "full_name" },
-            { "from": "address", "to": "addr" }
-          ]
-        }
-      ],
-      "loads": []
     }
   ]
 }
