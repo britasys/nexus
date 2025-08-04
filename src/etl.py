@@ -1,4 +1,7 @@
 from typing import List, Dict, Any
+import json
+
+from zmq_w import ZMQPubNode, ZMQSubNode
 
 
 class Extract:
@@ -64,15 +67,39 @@ class ETL:
         self.transforms = transforms
         self.loads = loads
 
-    def _run_extracts(self, handle_data: callable):
-        pass
+        self.extracts_pub_queue = ZMQPubNode(
+            "tcp://localhost:5555")
+        self.transforms_sub_queue = ZMQSubNode(
+            "tcp://localhost:5555", "extract")
+        self.transforms_pub_queue = ZMQPubNode(
+            "tcp://localhost:5556")
+        self.loads_sub_queue = ZMQSubNode(
+            "tcp://localhost:5556", "load")
+
+        self.extracts_pub_queue.start()
+        self.transforms_sub_queue.start()
+        self.transforms_pub_queue.start()
+        self.loads_sub_queue.start()
+
+    def _run_extracts(self):
+        data = {
+            "temperature": 24,
+            "humidity": 60,
+            "unit": "C"
+        }
+
+        topic = "weather"
+        json_msg = json.dumps(data)
+        self.extracts_pub_queue.send(f"{topic} {json_msg}")
+
+    def _run_transforms(self):
+        data = self.transforms_sub_queue.receive()
+        self.transforms_pub_queue.send(data)
+
+    def _run_loads(self):
+        data = self.loads_sub_queue.receive()
 
     def run(self):
-        def handle_data(data):
-            transformed_data = None
-            for transform in self.transforms:
-                transformed_data = {**transform.transform(data)}
-            for load in self.loads:
-                load.load(transformed_data)
-
-        self._run_extracts(handle_data)
+        self._run_extracts()
+        self._run_transforms()
+        self._run_loads()

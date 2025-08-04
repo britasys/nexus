@@ -24,13 +24,13 @@ class ZMQNode:
         return None
 
 
-class PubNode(ZMQNode):
+class ZMQPubNode(ZMQNode):
     def start(self):
         self.socket = self.context.socket(zmq.PUB)
         self.socket.bind(self.endpoint)
 
 
-class SubNode(ZMQNode):
+class ZMQSubNode(ZMQNode):
     def __init__(self, endpoint, topic="", context=None):
         super().__init__(endpoint, context)
         self.topic = topic
@@ -41,25 +41,25 @@ class SubNode(ZMQNode):
         self.socket.setsockopt_string(zmq.SUBSCRIBE, self.topic)
 
 
-class ReqNode(ZMQNode):
+class ZMQReqNode(ZMQNode):
     def start(self):
         self.socket = self.context.socket(zmq.REQ)
         self.socket.connect(self.endpoint)
 
 
-class RepNode(ZMQNode):
+class ZMQRepNode(ZMQNode):
     def start(self):
         self.socket = self.context.socket(zmq.REP)
         self.socket.bind(self.endpoint)
 
 
-class PushNode(ZMQNode):
+class ZMQPushNode(ZMQNode):
     def start(self):
         self.socket = self.context.socket(zmq.PUSH)
         self.socket.bind(self.endpoint)
 
 
-class PullNode(ZMQNode):
+class ZMQPullNode(ZMQNode):
     def start(self):
         self.socket = self.context.socket(zmq.PULL)
         self.socket.connect(self.endpoint)
